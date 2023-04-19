@@ -1,4 +1,4 @@
-import { None, Ok, Some, Option } from "oxide.ts";
+import { None, Ok, Some } from "oxide.ts";
 import { UUID } from "../../utilities/uuid";
 import { IPORepository } from "./IPORepository";
 import { PurchaseOrder } from "./PurchaseOrder";
