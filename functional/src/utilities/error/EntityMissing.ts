@@ -1,15 +1,15 @@
-import { isError } from 'lodash';
+import { isError } from "lodash";
 
-import { CustomError } from './CustomError';
+import { CustomError } from "./CustomError";
 
 export class EntityMissing extends CustomError {
-  name: 'EntityMissing';
+  name: "EntityMissing";
 
   constructor(message: string) {
     super(message);
-    this.name = 'EntityMissing';
+    this.name = "EntityMissing";
   }
 }
 
 export const isEntityMissing = (e: any): e is EntityMissing =>
-  isError(e) && e.name === 'EntityMissing';
+  isError(e) && e.name === "EntityMissing";
