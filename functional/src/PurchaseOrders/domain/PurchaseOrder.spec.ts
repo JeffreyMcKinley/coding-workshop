@@ -1,12 +1,19 @@
-import { isUuid } from "../../utilities/uuid";
+import { v4 } from "uuid";
+import { UUID, isUuid } from "../../utilities/uuid";
 import { createItem } from "./Item";
 import { addLineItemToPO, createPurchaseOrder } from "./PurchaseOrder";
 
 describe("Purcase Order Entity", () => {
   it("does it", () => {
+    const purchaser = {
+      id: v4() as UUID,
+      firstName: "Dave",
+      lastName: "Farley",
+    };
     const PO = createPurchaseOrder({
       lastPONumber: null,
       organizationName: "synapse",
+      purchaser,
     });
     expect(PO.isRight()).toBeTruthy();
     const po = PO.unsafeCoerce();
@@ -14,9 +21,15 @@ describe("Purcase Order Entity", () => {
   });
 
   it("adds a line item", () => {
+    const purchaser = {
+      id: v4() as UUID,
+      firstName: "Dave",
+      lastName: "Farley",
+    };
     const PO = createPurchaseOrder({
       lastPONumber: null,
       organizationName: "synapse",
+      purchaser,
     });
     expect(PO.isRight()).toBeTruthy();
     const po = PO.unsafeCoerce();
@@ -38,9 +51,30 @@ describe("Purcase Order Entity", () => {
   });
 
   it("increments a PO number", () => {
-    const PO = createPurchaseOrder({ lastPONumber: "syn-000001" });
+    const purchaser = {
+      id: v4() as UUID,
+      firstName: "Dave",
+      lastName: "Farley",
+    };
+    const PO = createPurchaseOrder({ lastPONumber: "syn-000001", purchaser });
     expect(PO.isRight()).toBeTruthy();
     const po = PO.unsafeCoerce();
     expect(po.poNumber).toBe("syn-000002");
+  });
+
+  it("saves the purchaser to the PO", () => {
+    const purchaser = {
+      id: v4() as UUID,
+      firstName: "Dave",
+      lastName: "Farley",
+    };
+    const PO = createPurchaseOrder({
+      lastPONumber: null,
+      organizationName: "synapse",
+      purchaser,
+    });
+    expect(PO.isRight).toBeTruthy();
+    const po = PO.unsafeCoerce();
+    expect(po.purchaser).toEqual(purchaser);
   });
 });

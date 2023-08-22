@@ -13,16 +13,24 @@ describe("Create PO Workflow", () => {
   });
 
   it("returns a uuid", async () => {
+    const purchaser = {
+      firstName: "Parker",
+      lastName: "Barrows",
+    };
     const repo = constructPORepository();
-    const poResult = await createPO({ PORepo: repo })([], "synapse");
+    const poResult = await createPO({ PORepo: repo })([], "synapse", purchaser);
     const id = poResult.unsafeCoerce() as UUID;
     expect(poResult.isRight()).toBeTruthy();
     expect(isUuid(id)).toBeTruthy();
   });
 
   it("saves a purchase order to a repository", async () => {
+    const purchaser = {
+      firstName: "Parker",
+      lastName: "Barrows",
+    };
     const repo = constructPORepository();
-    const result = await createPO({ PORepo: repo })([], "synapse");
+    const result = await createPO({ PORepo: repo })([], "synapse", purchaser);
     expect(result.isRight()).toBeTruthy();
     expect(isUuid(result.unsafeCoerce())).toBeTruthy();
     const id = result.unsafeCoerce() as UUID;
@@ -52,7 +60,15 @@ describe("Create PO Workflow", () => {
       description: "plant pot",
       quantity: 4000,
     };
-    const result = await createPO({ PORepo: repo })([plantPotOrder], "synapse");
+    const purchaser = {
+      firstName: "Parker",
+      lastName: "Barrows",
+    };
+    const result = await createPO({ PORepo: repo })(
+      [plantPotOrder],
+      "synapse",
+      purchaser
+    );
     const id = result.unsafeCoerce() as UUID;
 
     const poRes = (
@@ -71,5 +87,40 @@ describe("Create PO Workflow", () => {
     expect(poRes.lineItems).toEqual(
       expect.arrayContaining([expect.objectContaining(plantPotOrder)])
     );
+  });
+
+  it("saves purchaser info on initial purchase order creation", async () => {
+    const repo = constructPORepository();
+    const plantPotOrder = {
+      itemNumber: "111111",
+      price: 4.99,
+      description: "plant pot",
+      quantity: 4000,
+    };
+    const purchaser = {
+      firstName: "Parker",
+      lastName: "Barrows",
+    };
+    const result = await createPO({ PORepo: repo })(
+      [plantPotOrder],
+      "synapse",
+      purchaser
+    );
+    const id = result.unsafeCoerce() as UUID;
+
+    const poRes = (
+      await repo.fetch(id).chain(async (maybePO) =>
+        maybePO.caseOf({
+          Just: (_) => Right(maybePO),
+          Nothing: () => Left(null),
+        })
+      )
+    )
+      .unsafeCoerce()
+      .unsafeCoerce();
+
+    expect(isPurchaseOrder(poRes)).toBeTruthy();
+    expect(id).toEqual(poRes.id);
+    expect(poRes.purchaser).toEqual(expect.objectContaining(purchaser));
   });
 });

@@ -1,9 +1,12 @@
+import { Either, Left, Right } from "purify-ts/Either";
+
 import { createUuid, UUID, isUuid } from "../../utilities/uuid";
 import { Item } from "./Item";
-import { Either, Left, Right } from "purify-ts/Either";
+import { Purchaser } from "./Purchaser";
 
 export type PurchaseOrder = {
   id: UUID;
+  purchaser: Purchaser;
   poNumber: string;
   lineItems: LineItem[];
 };
@@ -11,17 +14,21 @@ export type LineItem = Item & { quantity: number };
 export type createPurchaseOrder = ({
   lastPONumber,
   organizationName,
+  purchaser,
 }: {
   lastPONumber: string | null;
   organizationName?: string | null;
+  purchaser: Purchaser;
 }) => Either<Error, PurchaseOrder>;
 
 export const createPurchaseOrder: createPurchaseOrder = ({
   lastPONumber,
   organizationName = null,
+  purchaser,
 }: {
   lastPONumber: string | null;
   organizationName?: string | null;
+  purchaser: Purchaser;
 }) => {
   if (lastPONumber === null) {
     if (organizationName === null)
@@ -31,6 +38,7 @@ export const createPurchaseOrder: createPurchaseOrder = ({
 
     return Right({
       id: createUuid(),
+      purchaser,
       poNumber: `${organizationName.slice(0, 3).toLocaleLowerCase()}-000001`,
       lineItems: [],
     });
@@ -50,6 +58,7 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       lastPONumberSections[0],
       String(parseInt(lastPONumberSections[1]) + 1).padStart(6, "0"),
     ].join("-"),
+    purchaser,
     lineItems: [],
   });
 };
@@ -75,8 +84,7 @@ export const addLineItemToPO = ({
   quantity: number;
 }): PurchaseOrder => {
   return {
-    id: PO.id,
-    poNumber: PO.poNumber,
+    ...PO,
     lineItems: [...PO.lineItems, { ...item, quantity }],
   };
 };

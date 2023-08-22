@@ -5,7 +5,9 @@ import {
   addLineItemToPO,
 } from "../domain/PurchaseOrder";
 import { createItem } from "../domain/Item";
-import { Codec, EitherAsync, GetType, Right, number, string } from "purify-ts";
+import { EitherAsync } from "purify-ts";
+import { v4 } from "uuid";
+import { UUID } from "../../utilities/uuid";
 
 type LineItemDTO = {
   itemNumber: string;
@@ -14,21 +16,25 @@ type LineItemDTO = {
   quantity: number;
 }[];
 
-const LineITemBody = Codec.interface({
-  itemNumber: string,
-  price: number,
-  description: string,
-  quantity: number,
-});
-
-type LineITemBody = GetType<typeof LineITemBody>;
+type PurcahserDTO = {
+  firstName: string;
+  lastName: string;
+};
 
 export const createPO =
   ({ PORepo }: { PORepo: IPORepository }) =>
-  async (lineItems: LineItemDTO, organizationName: string) => {
+  async (
+    lineItems: LineItemDTO,
+    organizationName: string,
+    purchaser: PurcahserDTO
+  ) => {
     const addLineItemsToPO = AddLineItemsToPO(lineItems);
     return EitherAsync.liftEither(
-      createPurchaseOrder({ lastPONumber: null, organizationName })
+      createPurchaseOrder({
+        lastPONumber: null,
+        organizationName,
+        purchaser: { id: v4() as UUID, ...purchaser },
+      })
     ).chain((po) => {
       const poWithLineItems = addLineItemsToPO(po);
       return PORepo.save(poWithLineItems);
@@ -63,19 +69,3 @@ function addLineItemsToPOIterative(
     iterator + 1
   );
 }
-
-// const po = addLineItemsToPO(
-//   createPurchaseOrder({ lastPONumber: null, organizationName })
-// );
-// () => ({ lastPONumber: null, organizationName })
-//   .chain(createPurchaseOrder)
-//   .chain(addLineItemsToPO)
-// .map<string>((po) => po.id));
-// const purchaseOrder = flow(
-//   () => ({ lastPONumber: null, organizationName }),
-//   createPurchaseOrder,
-//   addLineItemsToPO,
-//   PORepo.save
-// )();
-// const res = await purchaseOrder;
-// return res.map(() => purchaseOrder.id);
