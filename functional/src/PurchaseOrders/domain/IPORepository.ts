@@ -1,4 +1,4 @@
-import { Either, EitherAsync, Maybe } from "purify-ts";
+import { EitherAsync, Maybe } from "purify-ts";
 import { UUID } from "../../utilities/uuid";
 import { PurchaseOrder } from "./PurchaseOrder";
 

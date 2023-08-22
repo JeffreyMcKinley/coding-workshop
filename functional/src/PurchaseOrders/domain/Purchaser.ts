@@ -1,5 +1,4 @@
-import { v4 } from "uuid";
-import { UUID } from "../../utilities/uuid";
+import { UUID, createUuid } from "../../utilities/uuid";
 
 export type Purchaser = {
   id: UUID;
@@ -23,7 +22,7 @@ export const createPurchaser: createPurchaser = ({
   lastName: string;
 }) => {
   return {
-    id: v4() as UUID,
+    id: createUuid(),
     firstName,
     lastName,
   };
