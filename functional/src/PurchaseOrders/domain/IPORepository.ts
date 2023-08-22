@@ -1,8 +1,8 @@
-import { Option, Result } from "oxide.ts";
+import { Either, EitherAsync, Maybe } from "purify-ts";
 import { UUID } from "../../utilities/uuid";
 import { PurchaseOrder } from "./PurchaseOrder";
 
 export interface IPORepository {
-  save: (po: PurchaseOrder) => Promise<Result<undefined, Error>>;
-  fetch: (id: UUID) => Promise<Result<Option<PurchaseOrder>, Error>>;
+  save: (po: PurchaseOrder) => EitherAsync<Error, UUID>;
+  fetch: (id: UUID) => EitherAsync<Error, Maybe<PurchaseOrder>>;
 }
