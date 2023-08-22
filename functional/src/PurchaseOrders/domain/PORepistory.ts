@@ -20,7 +20,6 @@ class PORepository implements IPORepository {
   fetch(id: UUID): EitherAsync<Error, Maybe<PurchaseOrder>> {
     return EitherAsync(async () => {
       try {
-        console.log(this.purchaseOrders.find((p) => p.id === id))
         return Maybe.of(this.purchaseOrders.find((p) => p.id === id));
       } catch (e) {
         throw new Error(e.message);

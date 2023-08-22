@@ -6,7 +6,6 @@ import { isPurchaseOrder } from "../domain/PurchaseOrder";
 import { createPO } from "./Create-PO";
 import { Left, Right } from "purify-ts";
 
-
 describe("Create PO Workflow", () => {
   it("is callable", () => {
     const repo = constructPORepository();
@@ -27,12 +26,16 @@ describe("Create PO Workflow", () => {
     expect(result.isRight()).toBeTruthy();
     expect(isUuid(result.unsafeCoerce())).toBeTruthy();
     const id = result.unsafeCoerce() as UUID;
-    const poRes = (await repo.fetch(id).chain(async (maybePO) =>
-      maybePO.caseOf({
-        Just: (_) => Right(maybePO),
-        Nothing: () => Left(null),
-      })
-    )).unsafeCoerce().unsafeCoerce();
+    const poRes = (
+      await repo.fetch(id).chain(async (maybePO) =>
+        maybePO.caseOf({
+          Just: (_) => Right(maybePO),
+          Nothing: () => Left(null),
+        })
+      )
+    )
+      .unsafeCoerce()
+      .unsafeCoerce();
 
     expect(isPurchaseOrder(poRes)).toBeTruthy();
     if (isPurchaseOrder(poRes)) {
@@ -49,15 +52,19 @@ describe("Create PO Workflow", () => {
       description: "plant pot",
       quantity: 4000,
     };
-    const result = (await createPO({ PORepo: repo })([plantPotOrder], "synapse"));
+    const result = await createPO({ PORepo: repo })([plantPotOrder], "synapse");
     const id = result.unsafeCoerce() as UUID;
 
-    const poRes = (await repo.fetch(id).chain(async (maybePO) =>
-      maybePO.caseOf({
-        Just: (_) => Right(maybePO),
-        Nothing: () => Left(null),
-      })
-    )).unsafeCoerce().unsafeCoerce();
+    const poRes = (
+      await repo.fetch(id).chain(async (maybePO) =>
+        maybePO.caseOf({
+          Just: (_) => Right(maybePO),
+          Nothing: () => Left(null),
+        })
+      )
+    )
+      .unsafeCoerce()
+      .unsafeCoerce();
 
     expect(isPurchaseOrder(poRes)).toBeTruthy();
     expect(id).toEqual(poRes.id);

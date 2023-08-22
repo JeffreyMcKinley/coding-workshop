@@ -1,6 +1,6 @@
 import { createUuid, UUID, isUuid } from "../../utilities/uuid";
 import { Item } from "./Item";
-import { Either, Left, Right } from 'purify-ts/Either'
+import { Either, Left, Right } from "purify-ts/Either";
 
 export type PurchaseOrder = {
   id: UUID;
@@ -16,7 +16,6 @@ export type createPurchaseOrder = ({
   organizationName?: string | null;
 }) => Either<Error, PurchaseOrder>;
 
-
 export const createPurchaseOrder: createPurchaseOrder = ({
   lastPONumber,
   organizationName = null,
@@ -26,7 +25,9 @@ export const createPurchaseOrder: createPurchaseOrder = ({
 }) => {
   if (lastPONumber === null) {
     if (organizationName === null)
-      return Left(new Error("Cannot initialize first PO with company signature"));
+      return Left(
+        new Error("Cannot initialize first PO with company signature")
+      );
 
     return Right({
       id: createUuid(),

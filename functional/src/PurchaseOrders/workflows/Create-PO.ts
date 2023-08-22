@@ -32,7 +32,7 @@ export const createPO =
     ).chain((po) => {
       const poWithLineItems = addLineItemsToPO(po);
       return PORepo.save(poWithLineItems);
-    })
+    });
   };
 
 const AddLineItemsToPO =
