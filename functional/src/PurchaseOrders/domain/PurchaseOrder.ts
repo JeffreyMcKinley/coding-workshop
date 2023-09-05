@@ -4,11 +4,13 @@ import { createUuid, UUID, isUuid } from "../../utilities/uuid";
 import { Item } from "./Item";
 import { Purchaser } from "./Purchaser";
 
+type state = "draft" | "submitted";
 export type PurchaseOrder = {
   id: UUID;
   purchaser: Purchaser;
   poNumber: string;
   lineItems: LineItem[];
+  state: state;
 };
 export type LineItem = Item & { quantity: number };
 export type createPurchaseOrder = ({
@@ -40,6 +42,7 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       id: createUuid(),
       purchaser,
       poNumber: `${organizationName.slice(0, 3).toLocaleLowerCase()}-000001`,
+      state: 'submitted',
       lineItems: [],
     });
   }
@@ -58,6 +61,7 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       lastPONumberSections[0],
       String(parseInt(lastPONumberSections[1]) + 1).padStart(6, "0"),
     ].join("-"),
+    state: 'submitted',
     purchaser,
     lineItems: [],
   });
