@@ -4,15 +4,39 @@ import { createUuid, UUID, isUuid } from "../../utilities/uuid";
 import { Item } from "./Item";
 import { Purchaser } from "./Purchaser";
 
-type state = "draft" | "submitted";
-export type PurchaseOrder = {
+const PURCAHSE_ORDER_STATUS = {
+  DRAFT: "draft" as const,
+  PENDING_APPROVAL: "pending_approval" as const,
+  APPROVED: "approved" as const,
+};
+type PurchaseOrderStatus = "draft" | "pending_approval" | "approved";
+
+export type BasePurchaseOrder<status, poNumberState> = {
   id: UUID;
   purchaser: Purchaser;
-  poNumber: string;
+  poNumber: poNumberState;
   lineItems: LineItem[];
-  state: state;
+  status: status;
+  organizationName: string | null;
 };
+export type DraftPurchaseOrder = BasePurchaseOrder<"draft", null>;
+type PendingApprovalPurchaseOrder = BasePurchaseOrder<
+  "pending_approval",
+  string
+>;
+type ApprovedPurchaseOrder = BasePurchaseOrder<"approved", string>;
+export type PurchaseOrder =
+  | DraftPurchaseOrder
+  | PendingApprovalPurchaseOrder
+  | ApprovedPurchaseOrder;
 export type LineItem = Item & { quantity: number };
+export type createDraftPurchaseOrder = ({
+  purchaser,
+  organizationName,
+}: {
+  purchaser: Purchaser;
+  organizationName: string;
+}) => Either<Error, DraftPurchaseOrder>;
 export type createPurchaseOrder = ({
   lastPONumber,
   organizationName,
@@ -21,7 +45,28 @@ export type createPurchaseOrder = ({
   lastPONumber: string | null;
   organizationName?: string | null;
   purchaser: Purchaser;
-}) => Either<Error, PurchaseOrder>;
+}) => Either<Error, ApprovedPurchaseOrder>;
+
+export const createDraftPurchaseOrder: createDraftPurchaseOrder = ({
+  purchaser,
+  organizationName,
+}: {
+  purchaser: Purchaser;
+  organizationName: string;
+}) => {
+  if (organizationName.length === 0) {
+    return Left(new Error("organization cannot be blank"));
+  }
+
+  return Right({
+    id: createUuid(),
+    organizationName,
+    poNumber: null,
+    purchaser,
+    lineItems: [],
+    status: PURCAHSE_ORDER_STATUS.DRAFT,
+  });
+};
 
 export const createPurchaseOrder: createPurchaseOrder = ({
   lastPONumber,
@@ -42,8 +87,9 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       id: createUuid(),
       purchaser,
       poNumber: `${organizationName.slice(0, 3).toLocaleLowerCase()}-000001`,
-      state: 'submitted',
       lineItems: [],
+      status: PURCAHSE_ORDER_STATUS.APPROVED,
+      organizationName: null,
     });
   }
 
@@ -61,9 +107,10 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       lastPONumberSections[0],
       String(parseInt(lastPONumberSections[1]) + 1).padStart(6, "0"),
     ].join("-"),
-    state: 'submitted',
     purchaser,
     lineItems: [],
+    status: "approved",
+    organizationName: null,
   });
 };
 
@@ -91,4 +138,17 @@ export const addLineItemToPO = ({
     ...PO,
     lineItems: [...PO.lineItems, { ...item, quantity }],
   };
+};
+
+export const isDraftPurchaseOrder = (s: any): s is DraftPurchaseOrder => {
+  if (typeof s !== "object") return false;
+
+  const draftPO = s as DraftPurchaseOrder;
+  if (!draftPO.id) return false;
+  if (!isUuid(draftPO.id)) return false;
+  if (!draftPO.lineItems) return false;
+  if (!Array.isArray(draftPO.lineItems)) return false;
+  if (draftPO.poNumber !== null) return false;
+  if (draftPO.status !== PURCAHSE_ORDER_STATUS.DRAFT) return false;
+  return true;
 };
