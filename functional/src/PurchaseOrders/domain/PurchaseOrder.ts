@@ -11,7 +11,7 @@ export const PURCHASE_ORDER_STATUS = {
 };
 type PurchaseOrderStatus = "draft" | "pending_approval" | "approved";
 
-export type BasePurchaseOrder<status, poNumberState> = {
+export type BasePurchaseOrder<status extends PurchaseOrderStatus, poNumberState> = {
   id: UUID;
   purchaser: Purchaser;
   poNumber: poNumberState;
