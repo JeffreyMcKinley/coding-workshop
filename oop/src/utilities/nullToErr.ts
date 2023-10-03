@@ -1,4 +1,4 @@
-import { err, ok, Result } from 'neverthrow';
+import { err, ok, Result } from "neverthrow";
 
 /**
  * Maps the value to a `Result`, where `null` becomes the given error and all

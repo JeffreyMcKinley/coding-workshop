@@ -4,7 +4,7 @@ import { createUuid, UUID, isUuid } from "../../utilities/uuid";
 import { Item } from "./Item";
 import { Purchaser } from "./Purchaser";
 
-const PURCAHSE_ORDER_STATUS = {
+export const PURCHASE_ORDER_STATUS = {
   DRAFT: "draft" as const,
   PENDING_APPROVAL: "pending_approval" as const,
   APPROVED: "approved" as const,
@@ -46,7 +46,11 @@ export type createPurchaseOrder = ({
   organizationName?: string | null;
   purchaser: Purchaser;
 }) => Either<Error, ApprovedPurchaseOrder>;
-
+export type submitPurchaseOrder = (
+  draftPO: DraftPurchaseOrder,
+  lastPONumber: string | null
+) => Either<Error, PendingApprovalPurchaseOrder>;
+// draft po is assigned a po number
 export const createDraftPurchaseOrder: createDraftPurchaseOrder = ({
   purchaser,
   organizationName,
@@ -64,7 +68,7 @@ export const createDraftPurchaseOrder: createDraftPurchaseOrder = ({
     poNumber: null,
     purchaser,
     lineItems: [],
-    status: PURCAHSE_ORDER_STATUS.DRAFT,
+    status: PURCHASE_ORDER_STATUS.DRAFT,
   });
 };
 
@@ -88,7 +92,7 @@ export const createPurchaseOrder: createPurchaseOrder = ({
       purchaser,
       poNumber: `${organizationName.slice(0, 3).toLocaleLowerCase()}-000001`,
       lineItems: [],
-      status: PURCAHSE_ORDER_STATUS.APPROVED,
+      status: PURCHASE_ORDER_STATUS.APPROVED,
       organizationName: null,
     });
   }
@@ -109,9 +113,56 @@ export const createPurchaseOrder: createPurchaseOrder = ({
     ].join("-"),
     purchaser,
     lineItems: [],
-    status: "approved",
+    status: PURCHASE_ORDER_STATUS.APPROVED,
     organizationName: null,
   });
+};
+
+export const submitPurchaseOrder: submitPurchaseOrder = (
+  draftPO: DraftPurchaseOrder,
+  lastPONumber
+) => {
+  if (lastPONumber === null) {
+    return Right({
+      ...draftPO,
+      poNumber: `${draftPO.organizationName
+        .slice(0, 3)
+        .toLocaleLowerCase()}-000001`,
+      status: PURCHASE_ORDER_STATUS.PENDING_APPROVAL,
+    });
+  }
+
+  const lastPONumberSections: string[] = lastPONumber.split("-");
+  if (
+    lastPONumberSections.length !== 2 ||
+    Number.isNaN(parseInt(lastPONumberSections[1]))
+  ) {
+    return Left(new Error("not a valid previous PO number"));
+  }
+
+  return Right({
+    ...draftPO,
+    poNumber: [
+      lastPONumberSections[0],
+      String(parseInt(lastPONumberSections[1]) + 1).padStart(6, "0"),
+    ].join("-"),
+    status: PURCHASE_ORDER_STATUS.PENDING_APPROVAL,
+  });
+};
+
+export const addLineItemToPO = <T extends PurchaseOrder>({
+  PO,
+  item,
+  quantity,
+}: {
+  PO: T;
+  item: Item;
+  quantity: number;
+}): T => {
+  return {
+    ...PO,
+    lineItems: [...PO.lineItems, { ...item, quantity }],
+  };
 };
 
 export const isPurchaseOrder = (s: any): s is PurchaseOrder => {
@@ -125,21 +176,6 @@ export const isPurchaseOrder = (s: any): s is PurchaseOrder => {
   return true;
 };
 
-export const addLineItemToPO = ({
-  PO,
-  item,
-  quantity,
-}: {
-  PO: PurchaseOrder;
-  item: Item;
-  quantity: number;
-}): PurchaseOrder => {
-  return {
-    ...PO,
-    lineItems: [...PO.lineItems, { ...item, quantity }],
-  };
-};
-
 export const isDraftPurchaseOrder = (s: any): s is DraftPurchaseOrder => {
   if (typeof s !== "object") return false;
 
@@ -149,6 +185,6 @@ export const isDraftPurchaseOrder = (s: any): s is DraftPurchaseOrder => {
   if (!draftPO.lineItems) return false;
   if (!Array.isArray(draftPO.lineItems)) return false;
   if (draftPO.poNumber !== null) return false;
-  if (draftPO.status !== PURCAHSE_ORDER_STATUS.DRAFT) return false;
+  if (draftPO.status !== PURCHASE_ORDER_STATUS.DRAFT) return false;
   return true;
 };

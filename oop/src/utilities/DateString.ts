@@ -1,10 +1,10 @@
-import { Brand } from './brand';
+import { Brand } from "./brand";
 
 /**
  * Brands ISO8601-formatted date strings so that they are not easily
  * mixed with other strings.
  */
-export type DateString = Brand<string, 'DateString'>;
+export type DateString = Brand<string, "DateString">;
 
 export const DateString = {
   toDate(ds: DateString): Date {

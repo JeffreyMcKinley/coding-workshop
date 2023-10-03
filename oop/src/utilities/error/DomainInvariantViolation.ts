@@ -1,16 +1,16 @@
-import { CustomError } from './CustomError';
-import { isError } from 'lodash';
+import { CustomError } from "./CustomError";
+import { isError } from "lodash";
 
 export class DomainInvariantViolation extends CustomError {
-  name: 'DomainInvariantViolation';
+  name: "DomainInvariantViolation";
 
   constructor(message: string) {
     super(message);
-    this.name = 'DomainInvariantViolation';
+    this.name = "DomainInvariantViolation";
   }
 }
 
 export const isDomainInvariantViolation = (
-  e: any,
+  e: any
 ): e is DomainInvariantViolation =>
-  isError(e) && e.name === 'DomainInvariantViolation';
+  isError(e) && e.name === "DomainInvariantViolation";
