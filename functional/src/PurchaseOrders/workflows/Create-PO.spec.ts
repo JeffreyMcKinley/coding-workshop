@@ -1,7 +1,7 @@
 // https://github.com/gigobyte/ts-react-express-starter/blob/main/server/src/features/auth/LoginService.ts
 import { UUID } from "../../utilities/uuid";
 import { isUuid } from "../../utilities/uuid";
-import { constructPORepository } from "../domain/PORepistory";
+import { constructPORepository } from "../domain/PORepository";
 import { isPurchaseOrder } from "../domain/PurchaseOrder";
 import { createPO } from "./Create-PO";
 import { Left, Right } from "purify-ts";

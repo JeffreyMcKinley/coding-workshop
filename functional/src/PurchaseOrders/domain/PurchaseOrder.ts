@@ -11,7 +11,10 @@ export const PURCHASE_ORDER_STATUS = {
 };
 type PurchaseOrderStatus = "draft" | "pending_approval" | "approved";
 
-export type BasePurchaseOrder<status extends PurchaseOrderStatus, poNumberState> = {
+export type BasePurchaseOrder<
+  status extends PurchaseOrderStatus,
+  poNumberState
+> = {
   id: UUID;
   purchaser: Purchaser;
   poNumber: poNumberState;
@@ -20,7 +23,7 @@ export type BasePurchaseOrder<status extends PurchaseOrderStatus, poNumberState>
   organizationName: string | null;
 };
 export type DraftPurchaseOrder = BasePurchaseOrder<"draft", null>;
-type PendingApprovalPurchaseOrder = BasePurchaseOrder<
+export type PendingApprovalPurchaseOrder = BasePurchaseOrder<
   "pending_approval",
   string
 >;
@@ -186,5 +189,20 @@ export const isDraftPurchaseOrder = (s: any): s is DraftPurchaseOrder => {
   if (!Array.isArray(draftPO.lineItems)) return false;
   if (draftPO.poNumber !== null) return false;
   if (draftPO.status !== PURCHASE_ORDER_STATUS.DRAFT) return false;
+  return true;
+};
+
+export const isPendingPurchaseOrder = (
+  s: any
+): s is PendingApprovalPurchaseOrder => {
+  if (typeof s !== "object") return false;
+
+  const pendingPO = s as PendingApprovalPurchaseOrder;
+  if (!pendingPO.id) return false;
+  if (!isUuid(pendingPO.id)) return false;
+  if (!pendingPO.lineItems) return false;
+  if (!Array.isArray(pendingPO.lineItems)) return false;
+  if (!pendingPO.poNumber) return false;
+  if (pendingPO.status !== PURCHASE_ORDER_STATUS.PENDING_APPROVAL) return false;
   return true;
 };

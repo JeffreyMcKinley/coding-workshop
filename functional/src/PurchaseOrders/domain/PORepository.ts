@@ -1,6 +1,10 @@
 import { UUID } from "../../utilities/uuid";
 import { IPORepository } from "./IPORepository";
-import { PurchaseOrder } from "./PurchaseOrder";
+import {
+  PendingApprovalPurchaseOrder,
+  PurchaseOrder,
+  isPendingPurchaseOrder,
+} from "./PurchaseOrder";
 import { EitherAsync, Maybe } from "purify-ts";
 
 class PORepository implements IPORepository {
@@ -24,6 +28,17 @@ class PORepository implements IPORepository {
       } catch (e) {
         throw new Error(e.message);
       }
+    });
+  }
+
+  fetchAllPendingApproval(): EitherAsync<
+    Error,
+    Maybe<PendingApprovalPurchaseOrder[]>
+  > {
+    return EitherAsync(async () => {
+      return Maybe.of(
+        this.purchaseOrders.filter(isPendingPurchaseOrder)
+      );
     });
   }
 }

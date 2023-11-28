@@ -2,7 +2,7 @@
 import { Left, Right } from "purify-ts";
 import { UUID } from "../../utilities/uuid";
 import { isUuid } from "../../utilities/uuid";
-import { constructPORepository } from "../domain/PORepistory";
+import { constructPORepository } from "../domain/PORepository";
 import { createDraftPO } from "./Create-DraftPO";
 import { isDraftPurchaseOrder } from "../domain/PurchaseOrder";
 
